@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travelers - Ficha de Presentación</title>
+
+    <!-- Metatags dinámicas para Previsualización -->
+    <meta property="og:title" content="Propuesta de Alojamiento - Travelers Apartamentos & Suites" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="#" id="ogUrl" />
+    <meta property="og:image" content="https://i.imgur.com/O1h5I0v.png" id="ogImage" />
+    <meta property="og:description" content="Descubre esta propuesta de alojamiento personalizada de Travelers." id="ogDescription" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .slider-image { display: none; transition: opacity 0.5s ease-in-out; }
+        .slider-image.active { display: block; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ca8a04; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <div id="main-content" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+            
+            <header class="p-6 bg-gray-900 dark:bg-black text-white text-center">
+                <h2 class="text-xl font-light tracking-wider" id="header-subtitle">Propuesta para: Cliente</h2>
+                <h1 class="text-4xl sm:text-5xl font-bold text-amber-400 mt-1">Travelers Apartamentos & Suites 🇨🇴</h1>
+            </header>
+
+            <div id="image-slider" class="relative w-full h-64 sm:h-80 md:h-96 bg-gray-300 dark:bg-gray-700">
+                <div class="absolute inset-0 flex items-center justify-center"><p class="text-gray-500">Cargando fotos...</p></div>
+                <button id="prevBtn" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button id="nextBtn" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+
+            <main class="p-6 md:p-8">
+                <section class="text-center mb-8">
+                    <h3 id="edificio-nombre" class="text-3xl font-bold text-amber-500 dark:text-amber-400">NOMBRE DEL EDIFICIO</h3>
+                    <p id="edificio-ciudad" class="text-gray-600 dark:text-gray-300 mt-2 text-lg">Ciudad</p>
+                </section>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+                        <h4 id="apto-tipo" class="text-xl font-semibold text-gray-800 dark:text-white mb-4 border-b-2 border-amber-400 pb-2">Tipo de Apartamento</h4>
+                        <p id="apto-descripcion" class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            Descripción del apartamento...
+                        </p>
+                        <div class="mt-6 bg-amber-100 dark:bg-amber-900/50 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-r-lg">
+                            <p class="font-bold">Personas: <span id="info-personas" class="font-normal">0</span></p>
+                            <p class="font-bold">Noches: <span id="info-dias" class="font-normal">0</span></p>
+                            <p class="text-2xl font-bold mt-2">Total: <span id="info-total">$0</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+                        <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 border-b-2 border-amber-400 pb-2">Servicios Incluidos</h4>
+                        <ul class="space-y-3 text-gray-700 dark:text-gray-300">
+                            <li class="flex items-center"><svg class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Servicios Públicos y Administración</li>
+                            <li class="flex items-center"><svg class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Camarera (Lunes a Sábado)</li>
+                            <li class="flex items-center"><svg class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>WiFi dentro del apartamento</li>
+                            <li class="flex items-center"><svg class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>TV por Cable</li>
+                            <li class="flex items-center"><svg class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Recepción 24 horas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <section class="mt-8">
+                     <h4 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 text-center">Recorrido Virtual 360°</h4>
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-300 dark:bg-gray-700 rounded-xl overflow-hidden shadow-inner">
+                        <iframe id="tour-360" src="" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="p-6 bg-gray-900 dark:bg-black text-center">
+                <a href="https://wa.me/573113448623" target="_blank" class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg mb-6">
+                    <svg class="w-6 w-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654z"/></svg>
+                    <span>Contactar Asesor</span>
+                </a>
+                <p class="text-2xl font-semibold text-amber-400">¡Lo esperamos pronto!</p>
+            </footer>
+        </div>
+    </div>
+    
+    <div id="loading-state" class="text-center p-10">
+        <div class="loader mx-auto"></div>
+        <p class="text-gray-500 dark:text-gray-400 mt-4 text-lg">Cargando datos de la cotización...</p>
+    </div>
+
+    <div id="error-state" class="text-center p-10 hidden">
+        <h2 class="text-2xl font-bold text-red-600">Error al Cargar la Ficha</h2>
+        <p class="text-gray-600 dark:text-gray-300 mt-2">No se pudo encontrar la información. El enlace puede ser incorrecto.</p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.getElementById('main-content');
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+
+            const fichaData = {
+                "Obelisco Apartamentos": { fotos: ['https://placehold.co/800x400/334155/FFFFFF?text=Obelisco+1', 'https://placehold.co/800x400/334155/FFFFFF?text=Obelisco+2'], tour360: 'https://www.google.com/maps/embed?...' },
+                "Fontana Plaza": { fotos: ['https://placehold.co/800x400/7f1d1d/FFFFFF?text=Fontana+1', 'https://placehold.co/800x400/7f1d1d/FFFFFF?text=Fontana+2'], tour360: '' },
+                "Condominio Plenitud": { fotos: ['https://placehold.co/800x400/166534/FFFFFF?text=Plenitud+1', 'https://placehold.co/800x400/166534/FFFFFF?text=Plenitud+2'], tour360: '' },
+                "Castellón de Juanambú": { fotos: ['https://placehold.co/800x400/854d0e/FFFFFF?text=Juanambú+1', 'https://placehold.co/800x400/854d0e/FFFFFF?text=Juanambú+2'], tour360: '' },
+                "Orange Suites Medellín": { fotos: ['https://placehold.co/800x400/ea580c/FFFFFF?text=Orange+M+1', 'https://placehold.co/800x400/ea580c/FFFFFF?text=Orange+M+2'], tour360: '' },
+                "Rioverde Living Suites": { fotos: ['https://placehold.co/800x400/65a30d/FFFFFF?text=Rioverde+1', 'https://placehold.co/800x400/65a30d/FFFFFF?text=Rioverde+2'], tour360: '' },
+                "Orange Cartagena": { fotos: ['https://placehold.co/800x400/f97316/FFFFFF?text=Orange+C+1', 'https://placehold.co/800x400/f97316/FFFFFF?text=Orange+C+2'], tour360: '' },
+                "Terrazas Tayrona": { fotos: ['https://placehold.co/800x400/a16207/FFFFFF?text=Tayrona+1', 'https://placehold.co/800x400/a16207/FFFFFF?text=Tayrona+2'], tour360: '' },
+                "default": { fotos: ['https://placehold.co/800x400/cccccc/FFFFFF?text=Imagen+No+Disponible'], tour360: '' }
+            };
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+
+            if (!dataParam) {
+                showError();
+                return;
+            }
+
+            try {
+                // --- CORRECCIÓN UTF-8 ---
+                function b64DecodeUtf8(b64) {
+                    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                    return new TextDecoder().decode(bytes);
+                }
+
+                const jsonString = b64DecodeUtf8(dataParam);
+                const cotizacion = JSON.parse(jsonString);
+                
+                populateUI(cotizacion);
+                showContent();
+
+            } catch (e) {
+                console.error("Error decodificando la ficha:", e);
+                showError();
+            }
+
+            function populateUI(cotizacion) {
+                document.title = `${cotizacion.edificio} - Propuesta para ${cotizacion.cliente}`;
+                document.getElementById('header-subtitle').textContent = `Propuesta para: ${cotizacion.cliente}`;
+                document.getElementById('edificio-nombre').textContent = cotizacion.edificio.toUpperCase();
+                document.getElementById('apto-tipo').textContent = cotizacion.tipo;
+                document.getElementById('apto-descripcion').textContent = cotizacion.descripcionApto;
+                document.getElementById('info-personas').textContent = cotizacion.personas;
+                document.getElementById('info-dias').textContent = cotizacion.dias;
+                document.getElementById('info-total').textContent = cotizacion.total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+                const specificFichaData = fichaData[cotizacion.edificio] || fichaData.default;
+                const ciudades = { "Obelisco Apartamentos": "Bogotá", "Fontana Plaza": "Bogotá", "Condominio Plenitud": "Bogotá", "Castellón de Juanambú": "Cali", "Orange Suites Medellín": "Medellín", "Rioverde Living Suites": "Rionegro", "Orange Cartagena": "Cartagena", "Terrazas Tayrona": "Santa Marta" };
+                document.getElementById('edificio-ciudad').textContent = ciudades[cotizacion.edificio] || 'Ubicación';
+
+                document.getElementById('ogUrl').setAttribute('content', window.location.href);
+                document.getElementById('ogImage').setAttribute('content', specificFichaData.fotos[0]);
+                document.getElementById('ogDescription').setAttribute('content', `Propuesta para ${cotizacion.cliente} en ${cotizacion.edificio}. Total: ${document.getElementById('info-total').textContent}`);
+                
+                const tourFrame = document.getElementById('tour-360');
+                if (specificFichaData.tour360) {
+                    tourFrame.src = specificFichaData.tour360;
+                } else {
+                    tourFrame.parentElement.innerHTML = '<p class="text-center text-gray-500 p-8">Recorrido 360 no disponible para este edificio.</p>';
+                }
+
+                setupSlider(specificFichaData.fotos);
+            }
+
+            function setupSlider(images) {
+                const slider = document.getElementById('image-slider');
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                let currentImageIndex = 0;
+
+                slider.innerHTML = '';
+                images.forEach((src, index) => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = `Foto ${index + 1}`;
+                    img.className = `slider-image absolute top-0 left-0 w-full h-full object-cover ${index === 0 ? 'active' : ''}`;
+                    img.onerror = () => { img.src = 'https://placehold.co/800x400/fecaca/991b1b?text=Error+al+cargar'; };
+                    slider.appendChild(img);
+                });
+                slider.appendChild(prevBtn);
+                slider.appendChild(nextBtn);
+
+                function showImage(index) {
+                    slider.querySelectorAll('.slider-image').forEach((img, i) => img.classList.toggle('active', i === index));
+                }
+
+                nextBtn.addEventListener('click', () => {
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    showImage(currentImageIndex);
+                });
+                prevBtn.addEventListener('click', () => {
+                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                    showImage(currentImageIndex);
+                });
+                
+                setInterval(() => nextBtn.click(), 5000);
+            }
+
+            function showContent() {
+                loadingState.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            }
+
+            function showError() {
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

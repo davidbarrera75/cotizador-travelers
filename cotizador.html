@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travelers - Cotizador Corporativo Dinámico v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <img src="https://i.imgur.com/O1h5I0v.png" alt="Travelers Logo" class="mx-auto mb-4 h-20">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Herramienta de Cotización Dinámica</h1>
+            <p class="text-md text-gray-600 mt-2">Genera presentaciones profesionales para tus clientes en segundos.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Paso 1: Cotizar</h2>
+                <div id="cotizador-form" class="space-y-4">
+                    <!-- El formulario se renderiza aquí -->
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Paso 2: Escoger Ficha</h2>
+                    <div id="galeriaFichas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    <p id="fichaInstrucciones" class="text-center text-gray-500 py-8">Seleccione un edificio para ver las fichas disponibles.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Paso 3: Generar Presentación</h2>
+                    <div id="generador" class="text-center">
+                        <p id="generador-placeholder" class="text-gray-500">Complete los pasos 1 y 2 para generar el enlace.</p>
+                        <div id="generador-content" class="hidden fade-in">
+                            <p class="text-lg mb-2">¡Todo listo! Genera la presentación para:</p>
+                            <p id="resumenCliente" class="text-xl font-semibold text-red-600 mb-4"></p>
+                            <button id="generarUrlBtn" class="w-full md:w-auto bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-md">Generar URL</button>
+                            <div id="resultadoUrl" class="mt-6 hidden fade-in">
+                                <label for="urlGenerada" class="block text-sm font-medium text-gray-700 mb-1">Enlace para compartir:</label>
+                                <div class="flex">
+                                    <input type="text" id="urlGenerada" class="w-full p-2 border border-gray-300 rounded-l-lg bg-gray-50" readonly>
+                                    <button id="copiarUrlBtn" class="bg-gray-700 text-white px-4 rounded-r-lg hover:bg-gray-800">Copiar</button>
+                                </div>
+                                <a id="vistaPreviaBtn" href="#" target="_blank" class="inline-block mt-4 text-red-600 hover:text-red-800 font-semibold">Ver Vista Previa &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS LOCAL ---
+        const tarifarioData = {
+            "Obelisco Apartamentos":{id:"obelisco",ciudad:"Bogotá",tipos:{"1 Habitación":{pax:{1:266000,2:277000},descripcion:"Habitación con cama king o 2 camas sencillas, closet y baño con tina, Sala, Cocina equipada."},"2 Habitaciones":{pax:{2:367000,3:377000,4:387000},descripcion:"Habitación con cama king o dos camas sencillas, closet y baño con tina. Segunda habitación con cama king o dos camas sencillas y baño, Sala – Comedor, Cocina equipada."}}},
+            "Fontana Plaza":{id:"fontana",ciudad:"Bogotá",tipos:{"1 Habitación":{pax:{1:285000,2:297000},descripcion:"Habitación con cama king o dos camas sencillas, vestier y baño, Sala y cocina americana equipada."},"2 Habitaciones":{pax:{2:385000,3:396000,4:407000},descripcion:"Habitación con cama king o dos camas sencillas, vestier y baño. Habitación auxiliar con cama king o 2 camas sencillas, Baño auxiliar completo, Sala- comedor y Cocina americana equipada."}}},
+            "Condominio Plenitud":{id:"plenitud",ciudad:"Bogotá",tipos:{"1 Habitación":{pax:{1:310000,2:321000},descripcion:"Habitación con cama king o dos camas sencillas, walking closet y baño, Sala – comedor y Cocina equipada."},"2 Habitaciones":{pax:{2:409000,3:420000,4:431000},descripcion:"Habitación con cama king o dos camas sencillas, walking closet y baño. Segunda habitación con 1 o 2 camas sencillas y baño, Sala – comedor y Cocina equipada."}}},
+            "Castellón de Juanambú":{id:"juanambu",ciudad:"Cali",tipos:{"Junior":{pax:{1:170000,2:170000},descripcion:"Suite un solo ambiente. Cama Doble, Baño con tina, Sala – comedor y Cocina equipada."},"Junior Suite":{pax:{2:210000,3:210000,4:210000},descripcion:"Suite de dos ambientes. Habitación con 2 camas dobles y baño con tina, Sala con sofá cama, Comedor, Cocina equipada y Baño auxiliar completo."}}},
+            "Orange Suites Medellín":{id:"orange-medellin",ciudad:"Medellín",tipos:{"Orange":{pax:{1:270000,2:310000},descripcion:"Habitación principal con cama king o dos camas sencillas y baño interno, cocina abierta con barra y balcón."},"Orange Suites":{pax:{1:300000,2:340000},descripcion:"Apartamento de dos ambientes. Habitación con cama king o dos camas sencillas, baño - vestier, sala con sofá cama sencillo, cocina abierta con barra, baño exterior y balcón."},"Duplex Pequeño":{pax:{1:350000,2:390000,3:430000},descripcion:"Apartamento de dos pisos. 1° piso sala con sofá cama sencillo, cocina abierta con barra, baño exterior y balcón. 2° piso habitación con cama king o dos camas sencillas, baño - vestier y balcón."},"Duplex Grande":{pax:{1:400000,2:440000,3:480000,4:520000},descripcion:"Apartamento de dos pisos. 1° piso sala con sofá cama extradoble, comedor, cocina americana, baño exterior y balcón. 2° piso habitación con dos camas sencillas o cama King, baño - vestier y balcón."}}},
+            "Rioverde Living Suites":{id:"rioverde",ciudad:"Rionegro",tipos:{"Junior":{pax:{1:298000,2:346000},descripcion:"Aparta Suite de un solo ambiente con cama king o 2 camas sencillas, baño, closet con cajilla de seguridad, sala (sofá cama sencillo), cocina abierta equipada y balcón."},"Junior Suite":{pax:{1:338000,2:386000,3:434000},descripcion:"Apartamento de una habitación con cama king o dos camas sencillas, baño - vestier con cajilla de seguridad, sala (sofá cama doble), comedor, cocina abierta equipada y balcón. "},"Suite":{pax:{1:388000,2:436000,3:484000,4:532000},descripcion:"Apartamento de dos habitaciones: Habitación Principal con cama king o dos camas sencillas y baño - vestier con cajilla de seguridad. Habitación Auxiliar con cama king o dos camas sencillas, baño auxiliar completo, sala (sofa cama doble), comedor, cocina abierta equipada y balcón. "}}},
+            "Orange Cartagena":{id:"orange-cartagena",ciudad:"Cartagena",tipos:{"Orange":{pax:{1:340000,2:390000,3:440000,4:490000},descripcion:"Habitación principal con cama doble y baño interno. Segunda habitación con dos camas sencillas, Cocina equipada, Sala – comedor con balcón y segundo baño en el corredor."},"Orange Suite":{pax:{1:360000,2:410000,3:460000,4:510000},descripcion:"Habitación principal con cama king y baño interno con vestier. Segunda habitación con cama doble. Cocina equipada. Sala – comedor con balcón. Segundo baño en el corredor."},"Orange Suite Superior":{pax:{1:380000,2:430000,3:480000,4:530000,5:580000,6:630000},descripcion:"Habitación principal con cama king y baño interno con vestier. Segunda habitación con dos camas sencillas. Tercera habitación con un camarote y baño interno. Cocina equipada. Sala – comedor con balcón. Tercer baño en el corredor."},"Deluxe":{pax:{1:400000,2:450000,3:500000,4:550000,5:600000,6:650000},descripcion:"Habitación principal con cama king y baño interno con vestier. Segunda habitación con dos camas sencillas. Tercera habitación con un camarote y baño interno. Cocina equipada. Sala con sofá cama y comedor con balcón. Tercer baño en el corredor."}}},
+            "Terrazas Tayrona":{id:"tayrona",ciudad:"Santa Marta",tipos:{"Suite":{pax:{1:220000,2:270000},descripcion:"Habitación con cama doble y balcón.Sala con sofá cama doble y balcón.Cocina abierta equipada y barra tipo americana.Baño en el área social."},"Estándar":{pax:{1:240000,2:290000},descripcion:"Habitación con cama doble, baño y balcón.Sala con sofá cama doble y balcón.Cocina abierta equipada y barra tipo americano.Un baño en el área social."},"Apartasuite":{pax:{2:310000,3:360000,4:410000},descripcion:"Habitación principal con cama doble, baño y balcón.Habitación auxiliar con dos camas sencillas o cama King y balcón.  Sala  - comedor con sofá cama doble y balcón.Cocina abierta equipada y barra tipo americano. Segundo baño en el área social."},"Family":{pax:{2:330000,3:380000,4:430000},descripcion:"Habitación principal con cama doble, baño y balcón.Habitación auxiliar con dos camas sencillas o una cama king, baño y balcón.Sala-comedor con sofá cama doble y balcón.  Cocina abierta equipada y barra tipo americano.Segundo baño en el área social."}}}
+        };
+
+        let cotizacionActual = {};
+        let fichaSeleccionada = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarFormulario();
+            setupEventListeners();
+        });
+
+        function renderizarFormulario() {
+            const cotizadorForm = document.getElementById('cotizador-form');
+            cotizadorForm.innerHTML = `
+                <div><label for="edificio" class="block text-sm font-medium text-gray-700 mb-1">Edificio</label><select id="edificio" class="w-full p-3 border border-gray-300 rounded-lg"><option value="">Seleccione un edificio...</option>${Object.keys(tarifarioData).map(nombreEdificio => `<option value="${nombreEdificio}">${nombreEdificio}</option>`).join('')}</select></div>
+                <div><label for="tipoApto" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Apartamento</label><select id="tipoApto" class="w-full p-3 border border-gray-300 rounded-lg" disabled><option value="">Seleccione un tipo...</option></select></div>
+                <div><label for="personas" class="block text-sm font-medium text-gray-700 mb-1">Número de Personas</label><select id="personas" class="w-full p-3 border border-gray-300 rounded-lg" disabled><option value="">Seleccione personas...</option></select></div>
+                <div><label for="dias" class="block text-sm font-medium text-gray-700 mb-1">Número de Días</label><input type="number" id="dias" min="1" value="1" class="w-full p-3 border border-gray-300 rounded-lg"></div>
+                <div><label for="cliente" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Cliente (Opcional)</label><input type="text" id="cliente" placeholder="Ej: Juan Pérez" class="w-full p-3 border border-gray-300 rounded-lg"></div>
+                <button id="calcularBtn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300 shadow-md">Calcular Cotización</button>
+                <div id="resultadoCotizacion" class="mt-6 p-4 bg-gray-100 rounded-lg text-center hidden fade-in"><p class="text-lg">Precio Total:</p><p id="precioTotal" class="text-3xl font-bold text-red-600"></p></div>
+            `;
+        }
+
+        function setupEventListeners() {
+            const edificioSelect = document.getElementById('edificio');
+            const tipoAptoSelect = document.getElementById('tipoApto');
+            const personasSelect = document.getElementById('personas');
+            const calcularBtn = document.getElementById('calcularBtn');
+            const generarUrlBtn = document.getElementById('generarUrlBtn');
+            const copiarUrlBtn = document.getElementById('copiarUrlBtn');
+
+            edificioSelect.addEventListener('change', () => {
+                const edificio = edificioSelect.value;
+                resetUI();
+                if (edificio) {
+                    tipoAptoSelect.disabled = false;
+                    tipoAptoSelect.innerHTML = '<option value="">Seleccione un tipo...</option>';
+                    Object.keys(tarifarioData[edificio].tipos).forEach(tipo => {
+                        tipoAptoSelect.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+                    });
+                    cargarFichas(edificio);
+                }
+            });
+
+            tipoAptoSelect.addEventListener('change', () => {
+                const edificio = edificioSelect.value;
+                const tipo = tipoAptoSelect.value;
+                personasSelect.disabled = true;
+                personasSelect.innerHTML = '<option value="">Seleccione personas...</option>';
+                if (edificio && tipo) {
+                    personasSelect.disabled = false;
+                    const paxDisponibles = Object.keys(tarifarioData[edificio].tipos[tipo].pax);
+                    paxDisponibles.forEach(pax => {
+                        personasSelect.innerHTML += `<option value="${pax}">${pax} persona(s)</option>`;
+                    });
+                }
+            });
+
+            calcularBtn.addEventListener('click', () => {
+                const edificio = edificioSelect.value;
+                const tipo = tipoAptoSelect.value;
+                const personas = parseInt(personasSelect.value);
+                const dias = parseInt(document.getElementById('dias').value);
+
+                if (edificio && tipo && personas && dias > 0) {
+                    const precioPorNoche = tarifarioData[edificio].tipos[tipo].pax[personas];
+                    const total = precioPorNoche * dias;
+                    cotizacionActual = {
+                        edificio, tipo, personas, dias,
+                        cliente: document.getElementById('cliente').value || 'Cliente',
+                        total, precioPorNoche,
+                        descripcionApto: tarifarioData[edificio].tipos[tipo].descripcion
+                    };
+                    document.getElementById('precioTotal').textContent = total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                    document.getElementById('resultadoCotizacion').classList.remove('hidden');
+                    actualizarGenerador();
+                }
+            });
+            
+            generarUrlBtn.addEventListener('click', generarUrl);
+            copiarUrlBtn.addEventListener('click', copiarURL);
+        }
+
+        function cargarFichas(edificio) {
+            const fichas = [{ id: "ficha_gold", nombre: "Plantilla Gold", img: "https://placehold.co/400x300/ca8a04/ffffff?text=Gold" }];
+            const galeriaFichasDiv = document.getElementById('galeriaFichas');
+            galeriaFichasDiv.innerHTML = '';
+            document.getElementById('fichaInstrucciones').classList.add('hidden');
+            fichas.forEach(ficha => {
+                const card = document.createElement('div');
+                card.className = 'border rounded-lg p-2 cursor-pointer transition duration-300 card-hover';
+                card.dataset.fichaId = ficha.id;
+                card.innerHTML = `<img src="${ficha.img}" alt="${ficha.nombre}" class="rounded-md w-full h-32 object-cover"><p class="text-center font-semibold mt-2 text-sm">${ficha.nombre}</p>`;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#galeriaFichas > div').forEach(el => el.classList.remove('ring-2', 'ring-red-500'));
+                    card.classList.add('ring-2', 'ring-red-500');
+                    fichaSeleccionada = ficha.id;
+                    actualizarGenerador();
+                });
+                galeriaFichasDiv.appendChild(card);
+            });
+        }
+
+        function actualizarGenerador() {
+            const placeholder = document.getElementById('generador-placeholder');
+            const content = document.getElementById('generador-content');
+            if (cotizacionActual.total && fichaSeleccionada) {
+                placeholder.classList.add('hidden');
+                content.classList.remove('hidden');
+                document.getElementById('resumenCliente').textContent = cotizacionActual.cliente;
+            } else {
+                placeholder.classList.remove('hidden');
+                content.classList.add('hidden');
+            }
+        }
+
+        function generarUrl() {
+            const jsonString = JSON.stringify(cotizacionActual);
+            // --- CORRECCIÓN FINAL ---
+            const dataParaEnviar = btoa(unescape(encodeURIComponent(jsonString)));
+            
+            const baseUrl = 'https://cotizador.lexai.it.com/ficha_presentacion.html'; 
+            const finalUrl = `${baseUrl}?data=${dataParaEnviar}`;
+
+            document.getElementById('urlGenerada').value = finalUrl;
+            document.getElementById('vistaPreviaBtn').href = finalUrl;
+            document.getElementById('resultadoUrl').classList.remove('hidden');
+        }
+        
+        function copiarURL() {
+            const urlInput = document.getElementById('urlGenerada');
+            const copiarBtn = document.getElementById('copiarUrlBtn');
+            urlInput.select();
+            document.execCommand('copy');
+            copiarBtn.textContent = '¡Copiado!';
+            setTimeout(() => { copiarBtn.textContent = 'Copiar'; }, 2000);
+        }
+
+        function resetUI() {
+            const tipoAptoSelect = document.getElementById('tipoApto');
+            const personasSelect = document.getElementById('personas');
+            tipoAptoSelect.disabled = true;
+            tipoAptoSelect.innerHTML = '<option value="">Seleccione un tipo...</option>';
+            personasSelect.disabled = true;
+            personasSelect.innerHTML = '<option value="">Seleccione personas...</option>';
+            document.getElementById('resultadoCotizacion').classList.add('hidden');
+            document.getElementById('galeriaFichas').innerHTML = '';
+            document.getElementById('fichaInstrucciones').classList.remove('hidden');
+            cotizacionActual = {};
+            fichaSeleccionada = null;
+            actualizarGenerador();
+            document.getElementById('resultadoUrl').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
