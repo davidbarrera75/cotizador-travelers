@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------
--- --- SCRIPT DE INICIALIZACIÓN PARA LA BASE DE DATOS cotizador_db ---
+-- --- SCRIPT DE INICIALIZACIÓN (VERSIÓN CON LOGIN SIMPLIFICADO) ---
 -- -----------------------------------------------------------------
 
 -- Borramos las tablas si ya existen para empezar desde cero.
@@ -7,17 +7,16 @@ DROP TABLE IF EXISTS tarifas;
 DROP TABLE IF EXISTS tipos_apartamento;
 DROP TABLE IF EXISTS edificios;
 DROP TABLE IF EXISTS fichas;
+DROP TABLE IF EXISTS usuarios;
 
 -- --- ESTRUCTURA DE TABLAS ---
 
--- Tabla para los edificios
 CREATE TABLE edificios (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) UNIQUE NOT NULL,
     ciudad VARCHAR(100) NOT NULL
 );
 
--- Tabla para los tipos de apartamento, vinculada a un edificio
 CREATE TABLE tipos_apartamento (
     id SERIAL PRIMARY KEY,
     edificio_id INTEGER NOT NULL REFERENCES edificios(id),
@@ -25,7 +24,6 @@ CREATE TABLE tipos_apartamento (
     descripcion TEXT
 );
 
--- Tabla para las tarifas, vinculada a un tipo de apartamento
 CREATE TABLE tarifas (
     id SERIAL PRIMARY KEY,
     tipo_apartamento_id INTEGER NOT NULL REFERENCES tipos_apartamento(id),
@@ -33,7 +31,6 @@ CREATE TABLE tarifas (
     precio INTEGER NOT NULL
 );
 
--- Tabla para guardar las fichas de cotización generadas
 CREATE TABLE fichas (
     id SERIAL PRIMARY KEY,
     cliente VARCHAR(255),
@@ -46,9 +43,23 @@ CREATE TABLE fichas (
     fecha_creacion TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Tabla de usuarios con contraseña en texto plano
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_plain VARCHAR(255) NOT NULL
+);
+
+
 -- --- INSERCIÓN DE DATOS INICIALES ---
 
--- Insertar Edificios
+-- Insertar usuarios de ejemplo con contraseñas en texto plano
+-- Usuario 1: admin / password123
+INSERT INTO usuarios (username, password_plain) VALUES ('admin', 'password123');
+-- Usuario 2: david / travelers2025
+INSERT INTO usuarios (username, password_plain) VALUES ('david', 'travelers2025');
+
+-- (El resto de la inserción de datos de tarifas es igual)
 INSERT INTO edificios (nombre, ciudad) VALUES
 ('Obelisco Apartamentos', 'Bogotá'),
 ('Fontana Plaza', 'Bogotá'),
@@ -58,8 +69,6 @@ INSERT INTO edificios (nombre, ciudad) VALUES
 ('Rioverde Living Suites', 'Rionegro'),
 ('Orange Cartagena', 'Cartagena'),
 ('Terrazas Tayrona', 'Santa Marta');
-
--- Insertar Tipos de Apartamento (COMPLETO)
 INSERT INTO tipos_apartamento (edificio_id, nombre, descripcion) VALUES
 ((SELECT id FROM edificios WHERE nombre = 'Obelisco Apartamentos'), '1 Habitación', 'Habitación con cama king o 2 camas sencillas, closet y baño con tina, Sala, Cocina equipada.'),
 ((SELECT id FROM edificios WHERE nombre = 'Obelisco Apartamentos'), '2 Habitaciones', 'Habitación con cama king o dos camas sencillas, closet y baño con tina. Segunda habitación con cama king o dos camas sencillas y baño, Sala – Comedor, Cocina equipada.'),
@@ -84,8 +93,6 @@ INSERT INTO tipos_apartamento (edificio_id, nombre, descripcion) VALUES
 ((SELECT id FROM edificios WHERE nombre = 'Terrazas Tayrona'), 'Estándar', 'Habitación con cama doble, baño y balcón.Sala con sofá cama doble y balcón.Cocina abierta equipada y barra tipo americano.Un baño en el área social.'),
 ((SELECT id FROM edificios WHERE nombre = 'Terrazas Tayrona'), 'Apartasuite', 'Habitación principal con cama doble, baño y balcón.Habitación auxiliar con dos camas sencillas o cama King y balcón.  Sala  - comedor con sofá cama doble y balcón.Cocina abierta equipada y barra tipo americano. Segundo baño en el área social.'),
 ((SELECT id FROM edificios WHERE nombre = 'Terrazas Tayrona'), 'Family', 'Habitación principal con cama doble, baño y balcón.Habitación auxiliar con dos camas sencillas o una cama king, baño y balcón.Sala-comedor con sofá cama doble y balcón.  Cocina abierta equipada y barra tipo americano.Segundo baño en el área social.');
-
--- Insertar Tarifas (COMPLETO)
 INSERT INTO tarifas (tipo_apartamento_id, personas, precio) VALUES
 -- Obelisco
 ((SELECT id FROM tipos_apartamento WHERE nombre = '1 Habitación' AND edificio_id = (SELECT id FROM edificios WHERE nombre = 'Obelisco Apartamentos')), 1, 266000),
