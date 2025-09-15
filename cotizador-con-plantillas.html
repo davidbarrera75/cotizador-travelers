@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador Travelers - Con Plantillas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .form-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .template-selector {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .template-selector h3 {
+            color: #4f46e5;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .template-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .template-option {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .template-option:hover {
+            border-color: #4f46e5;
+            background: #f8fafc;
+        }
+
+        .template-option.active {
+            border-color: #4f46e5;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .edit-template-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-template-btn:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .result-panel {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 600px;
+            display: none;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, var(--primary-color, #4f46e5) 0%, var(--secondary-color, #7c3aed) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .result-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary-color, #4f46e5);
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .result-subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .result-body {
+            padding: 2rem;
+        }
+
+        .result-gallery {
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            min-height: 200px;
+            background: #f1f5f9;
+        }
+
+        .gallery-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .gallery-images {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .gallery-image {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .gallery-nav:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav.prev {
+            left: 10px;
+        }
+
+        .gallery-nav.next {
+            right: 10px;
+        }
+
+        .tour-virtual {
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .tour-virtual h3 {
+            color: var(--primary-color, #4f46e5);
+            padding: 1rem;
+            background: rgba(79, 70, 229, 0.1);
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .tour-virtual iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-section h3 {
+            color: var(--primary-color, #4f46e5);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color, #4f46e5);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color, #4f46e5);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .service-badge {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color, #4f46e5);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        .price-highlight {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .price-highlight .price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-highlight .period {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 1rem;
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cotizador Travelers</h1>
+            <p>Genera cotizaciones profesionales con plantillas personalizadas</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Panel de Formulario -->
+            <div class="form-panel">
+                <!-- Selector de Plantillas -->
+                <div class="template-selector">
+                    <h3>Seleccionar Plantilla</h3>
+                    <div class="template-options">
+                        <div class="template-option active" data-template="default" onclick="selectTemplate('default')">
+                            Predeterminada
+                        </div>
+                        <div class="template-option" data-template="saved" onclick="selectTemplate('saved')">
+                            Personalizada
+                        </div>
+                        <div class="template-option" data-template="premium" onclick="selectTemplate('premium')">
+                            Premium
+                        </div>
+                        <div class="template-option" data-template="classic" onclick="selectTemplate('classic')">
+                            Clásica
+                        </div>
+                    </div>
+                    <button class="edit-template-btn" onclick="openTemplateEditor()">
+                        Editar Plantillas
+                    </button>
+                </div>
+
+                <!-- Formulario de Cotización -->
+                <form id="cotizacionForm">
+                    <div class="form-group">
+                        <label for="destino">Destino</label>
+                        <select id="destino" class="form-control" onchange="cargarTipos()">
+                            <option value="">Selecciona un destino</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoApartamento">Tipo de Apartamento</label>
+                        <select id="tipoApartamento" class="form-control" onchange="cargarPersonas()">
+                            <option value="">Primero selecciona un destino</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="personas">Número de Personas</label>
+                        <select id="personas" class="form-control">
+                            <option value="">Primero selecciona un tipo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaEntrada">Fecha de Entrada</label>
+                        <input type="date" id="fechaEntrada" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaSalida">Fecha de Salida</label>
+                        <input type="date" id="fechaSalida" class="form-control" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        Generar Cotización
+                    </button>
+                </form>
+            </div>
+
+            <!-- Panel de Resultados -->
+            <div class="result-panel" id="resultPanel">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTemplate = 'default';
+        let currentSlideIndex = 0;
+        let galleryImages = [];
+        
+        // Configuración de plantillas predefinidas
+        const templateConfigs = {
+            default: {
+                title: 'Cotización Travelers',
+                subtitle: 'Apartamentos turísticos en destinos únicos',
+                description: 'Disfruta de una experiencia única en nuestros apartamentos completamente equipados',
+                primaryColor: '#4f46e5',
+                secondaryColor: '#7c3aed',
+                phone: '+57 300 123 4567',
+                email: 'reservas@travelers.com',
+                website: 'www.travelers.com',
+                images: [
+                    'https://placehold.co/600x400/4f46e5/ffffff?text=Apartamento+1',
+                    'https://placehold.co/600x400/7c3aed/ffffff?text=Apartamento+2',
+                    'https://placehold.co/600x400/059669/ffffff?text=Apartamento+3'
+                ],
+                tourIframe: '',
+                services: ['WiFi Gratis', 'Aire Acondicionado', 'Cocina Equipada']
+            },
+            premium: {
+                title: 'Travelers Premium Experience',
+                subtitle: 'Lujo y confort en destinos exclusivos',
+                description: 'Experimenta el máximo lujo en nuestros apartamentos premium',
+                primaryColor: '#d97706',
+                secondaryColor: '#b45309',
+                phone: '+57 300 123 4567',
+                email: 'premium@travelers.com',
+                website: 'premium.travelers.com',
+                images: [
+                    'https://placehold.co/600x400/d97706/ffffff?text=Premium+Suite',
+                    'https://placehold.co/600x400/b45309/ffffff?text=Premium+View'
+                ],
+                tourIframe: '',
+                services: ['Servicio de Conserjería', 'WiFi Premium', 'Vista al Mar', 'Gimnasio Privado']
+            },
+            classic: {
+                title: 'Travelers Clásico',
+                subtitle: 'Elegancia tradicional en cada detalle',
+                description: 'Apartamentos con estilo clásico y todas las comodidades',
+                primaryColor: '#059669',
+                secondaryColor: '#0891b2',
+                phone: '+57 300 123 4567',
+                email: 'clasico@travelers.com',
+                website: 'clasico.travelers.com',
+                images: [
+                    'https://placehold.co/600x400/059669/ffffff?text=Clasico+Elegante'
+                ],
+                tourIframe: '',
+                services: ['WiFi Gratis', 'Cocina Tradicional', 'Balcón Privado']
+            }
+        };
+
+        // Datos de edificios y tarifas (simulados)
+        const edificiosData = {
+            "Bocagrande Luxury": {
+                ciudad: "Cartagena",
+                tipos: {
+                    "Suite": {
+                        pax: {1: 180000, 2: 230000, 3: 280000, 4: 330000},
+                        descripcion: "Suite elegante con todas las comodidades"
+                    },
+                    "Estudio": {
+                        pax: {1: 150000, 2: 200000},
+                        descripcion: "Espacio compacto y funcional"
+                    }
+                }
+            },
+            "Castillo Grande": {
+                ciudad: "Cartagena", 
+                tipos: {
+                    "Apartamento": {
+                        pax: {2: 280000, 3: 330000, 4: 380000},
+                        descripcion: "Apartamento completo frente al mar"
+                    }
+                }
+            }
+        };
+
+        // Cargar plantilla guardada del editor
+        function loadSavedTemplate() {
+            const saved = localStorage.getItem('currentTemplate');
+            if (saved) {
+                try {
+                    const config = JSON.parse(saved);
+                    templateConfigs.saved = {
+                        title: config.title || 'Plantilla Personalizada',
+                        subtitle: config.subtitle || 'Creada con el editor',
+                        description: config.description || 'Plantilla personalizada',
+                        primaryColor: config.primaryColor || '#4f46e5',
+                        secondaryColor: config.secondaryColor || '#7c3aed',
+                        phone: config.phone || '+57 300 123 4567',
+                        email: config.email || 'reservas@travelers.com',
+                        website: config.website || 'www.travelers.com',
+                        images: config.images ? config.images.split('\n').filter(img => img.trim()) : [],
+                        tourIframe: config.tourIframe || '',
+                        services: config.services || []
+                    };
+                } catch (e) {
+                    console.error('Error cargando plantilla guardada:', e);
+                }
+            }
+        }
+
+        function selectTemplate(templateId) {
+            currentTemplate = templateId;
+            
+            // Actualizar indicadores visuales
+            document.querySelectorAll('.template-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`[data-template="${templateId}"]`).classList.add('active');
+            
+            // Si hay una cotización mostrada, regenerarla con la nueva plantilla
+            const resultPanel = document.getElementById('resultPanel');
+            if (resultPanel.style.display !== 'none') {
+                // Regenerar con la nueva plantilla
+                const form = document.getElementById('cotizacionForm');
+                const formData = new FormData(form);
+                if (formData.get('destino') && formData.get('tipoApartamento') && formData.get('personas')) {
+                    generarCotizacion();
+                }
+            }
+        }
+
+        function openTemplateEditor() {
+            window.open('/template-editor.html', '_blank');
+        }
+
+        function cargarTipos() {
+            const destinoSelect = document.getElementById('destino');
+            const tipoSelect = document.getElementById('tipoApartamento');
+            const personasSelect = document.getElementById('personas');
+            
+            const destino = destinoSelect.value;
+            
+            tipoSelect.innerHTML = '<option value="">Selecciona un tipo</option>';
+            personasSelect.innerHTML = '<option value="">Primero selecciona un tipo</option>';
+            
+            if (destino && edificiosData[destino]) {
+                Object.keys(edificiosData[destino].tipos).forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo;
+                    option.textContent = tipo;
+                    tipoSelect.appendChild(option);
+                });
+            }
+        }
+
+        function cargarPersonas() {
+            const destinoSelect = document.getElementById('destino');
+            const tipoSelect = document.getElementById('tipoApartamento');
+            const personasSelect = document.getElementById('personas');
+            
+            const destino = destinoSelect.value;
+            const tipo = tipoSelect.value;
+            
+            personasSelect.innerHTML = '<option value="">Selecciona número de personas</option>';
+            
+            if (destino && tipo && edificiosData[destino] && edificiosData[destino].tipos[tipo]) {
+                const paxOptions = edificiosData[destino].tipos[tipo].pax;
+                Object.keys(paxOptions).forEach(pax => {
+                    const option = document.createElement('option');
+                    option.value = pax;
+                    option.textContent = `${pax} persona${pax > 1 ? 's' : ''}`;
+                    personasSelect.appendChild(option);
+                });
+            }
+        }
+
+        function generarCotizacion() {
+            const destino = document.getElementById('destino').value;
+            const tipo = document.getElementById('tipoApartamento').value;
+            const personas = document.getElementById('personas').value;
+            const fechaEntrada = document.getElementById('fechaEntrada').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+
+            if (!destino || !tipo || !personas || !fechaEntrada || !fechaSalida) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            // Calcular días
+            const entrada = new Date(fechaEntrada);
+            const salida = new Date(fechaSalida);
+            const dias = Math.ceil((salida - entrada) / (1000 * 60 * 60 * 24));
+
+            if (dias <= 0) {
+                alert('La fecha de salida debe ser posterior a la fecha de entrada');
+                return;
+            }
+
+            // Obtener precio
+            const precioPorNoche = edificiosData[destino].tipos[tipo].pax[personas];
+            const precioTotal = precioPorNoche * dias;
+
+            // Obtener configuración de plantilla
+            const config = templateConfigs[currentTemplate] || templateConfigs.default;
+
+            // Generar resultado
+            mostrarResultado({
+                destino,
+                tipo,
+                personas,
+                fechaEntrada,
+                fechaSalida,
+                dias,
+                precioPorNoche,
+                precioTotal,
+                descripcion: edificiosData[destino].tipos[tipo].descripcion,
+                config
+            });
+        }
+
+        function mostrarResultado(data) {
+            const resultPanel = document.getElementById('resultPanel');
+            
+            // Aplicar colores CSS
+            document.documentElement.style.setProperty('--primary-color', data.config.primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', data.config.secondaryColor);
+            
+            // Preparar galería
+            galleryImages = data.config.images && data.config.images.length > 0 
+                ? data.config.images 
+                : ['https://placehold.co/600x400/cccccc/666666?text=Sin+Imagenes'];
+            currentSlideIndex = 0;
+            
+            resultPanel.innerHTML = `
+                <div class="result-header">
+                    <div class="result-logo">🏢</div>
+                    <div class="result-title">${data.config.title}</div>
+                    <div class="result-subtitle">${data.config.subtitle}</div>
+                </div>
+                
+                <div class="result-body">
+                    ${galleryImages.length > 0 ? `
+                    <div class="result-gallery">
+                        <div class="gallery-container">
+                            <div class="gallery-images" id="galleryImages">
+                                ${galleryImages.map((img, index) => 
+                                    `<img src="${img}" alt="Imagen ${index + 1}" class="gallery-image">`
+                                ).join('')}
+                            </div>
+                            ${galleryImages.length > 1 ? `
+                            <button class="gallery-nav prev" onclick="previousGallerySlide()">‹</button>
+                            <button class="gallery-nav next" onclick="nextGallerySlide()">›</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${data.config.tourIframe ? `
+                    <div class="tour-virtual">
+                        <h3>Tour Virtual</h3>
+                        ${data.config.tourIframe}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="info-section">
+                        <h3>Detalles de la Reserva</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Destino</div>
+                                <div class="info-value">${data.destino}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Tipo</div>
+                                <div class="info-value">${data.tipo}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Huéspedes</div>
+                                <div class="info-value">${data.personas} persona${data.personas > 1 ? 's' : ''}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Noches</div>
+                                <div class="info-value">${data.dias}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Check-in</div>
+                                <div class="info-value">${new Date(data.fechaEntrada).toLocaleDateString('es-ES')}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Check-out</div>
+                                <div class="info-value">${new Date(data.fechaSalida).toLocaleDateString('es-ES')}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Información del Apartamento</h3>
+                        <p>${data.config.description}</p>
+                        <p><strong>Detalles:</strong> ${data.descripcion}</p>
+                    </div>
+
+                    ${data.config.services && data.config.services.length > 0 ? `
+                    <div class="info-section">
+                        <h3>Servicios Incluidos</h3>
+                        <div class="services-grid">
+                            ${data.config.services.map(service => 
+                                `<div class="service-badge">${service}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="price-highlight">
+                        <div class="price">$${data.precioTotal.toLocaleString('es-CO')}</div>
+                        <div class="period">Total por ${data.dias} noche${data.dias !== 1 ? 's' : ''}</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">
+                            $${data.precioPorNoche.toLocaleString('es-CO')} por noche
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Contacto</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Teléfono</div>
+                                <div class="info-value">${data.config.phone}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">${data.config.email}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-secondary" onclick="window.print()">Imprimir PDF</button>
+                        <button class="btn-secondary" onclick="compartirCotizacion()">Compartir</button>
+                        <button class="btn-secondary" onclick="nuevaCotizacion()">Nueva Cotización</button>
+                    </div>
+                </div>
+            `;
+            
+            resultPanel.style.display = 'block';
+            updateGalleryPosition();
+            
+            // Scroll suave hacia el resultado
+            resultPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function nextGallerySlide() {
+            if (galleryImages.length <= 1) return;
+            currentSlideIndex = (currentSlideIndex + 1) % galleryImages.length;
+            updateGalleryPosition();
+        }
+
+        function previousGallerySlide() {
+            if (galleryImages.length <= 1) return;
+            currentSlideIndex = (currentSlideIndex - 1 + galleryImages.length) % galleryImages.length;
+            updateGalleryPosition();
+        }
+
+        function updateGalleryPosition() {
+            const galleryImages = document.getElementById('galleryImages');
+            if (galleryImages) {
+                galleryImages.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            }
+        }
+
+        function compartirCotizacion() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Cotización Travelers',
+                    text: 'Mira esta cotización de apartamento',
+                    url: window.location.href
+                });
+            } else {
+                alert('Funcionalidad de compartir disponible pronto!');
+            }
+        }
+
+        function nuevaCotizacion() {
+            document.getElementById('resultPanel').style.display = 'none';
+            document.getElementById('cotizacionForm').reset();
+            document.getElementById('tipoApartamento').innerHTML = '<option value="">Primero selecciona un destino</option>';
+            document.getElementById('personas').innerHTML = '<option value="">Primero selecciona un tipo</option>';
+        }
+
+        // Event listeners
+        document.getElementById('cotizacionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generarCotizacion();
+        });
+
+        // Inicialización
+        window.addEventListener('load', function() {
+            // Cargar plantilla guardada
+            loadSavedTemplate();
+            
+            // Cargar destinos
+            const destinoSelect = document.getElementById('destino');
+            Object.keys(edificiosData).forEach(edificio => {
+                const option = document.createElement('option');
+                option.value = edificio;
+                option.textContent = edificio;
+                destinoSelect.appendChild(option);
+            });
+        });
+    </script>
+</body>
+</html>

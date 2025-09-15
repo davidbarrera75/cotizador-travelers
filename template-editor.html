@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editor de Plantillas - Cotizador Travelers</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segura UI', Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .header {
+        background: white;
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 1.5rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #4f46e5;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #3730a3;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .btn-secondary:hover {
+        background: #d1d5db;
+      }
+
+      .editor-container {
+        display: grid;
+        grid-template-columns: 300px 1fr 300px;
+        height: calc(100vh - 80px);
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .panel {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .panel-header {
+        background: #f8fafc;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .panel-content {
+        padding: 1rem;
+        height: calc(100% - 60px);
+        overflow-y: auto;
+      }
+
+      .tools-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .tools-section h3 {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .color-picker {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .color-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+      }
+
+      .color-option:hover {
+        transform: scale(1.1);
+        border-color: #333;
+      }
+
+      .color-option.active {
+        border-color: #4f46e5;
+        transform: scale(1.1);
+      }
+
+      .services-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.5rem;
+        background: #f8fafc;
+      }
+
+      .service-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+        background: white;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .service-checkbox {
+        margin-right: 0.5rem;
+      }
+
+      .remove-service {
+        color: #dc2626;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 0.25rem;
+        border-radius: 3px;
+      }
+
+      .remove-service:hover {
+        background: #fef2f2;
+      }
+
+      .preview-container {
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .template-preview {
+        background: white;
+        width: 90%;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .template-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color, #4f46e5) 0%,
+          var(--secondary-color, #7c3aed) 100%
+        );
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .template-logo {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--primary-color, #4f46e5);
+      }
+
+      .template-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .template-subtitle {
+        opacity: 0.9;
+        font-size: 1rem;
+      }
+
+      .template-body {
+        padding: 2rem;
+      }
+
+      .info-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .info-section h3 {
+        color: var(--primary-color, #4f46e5);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      .info-item {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color, #4f46e5);
+      }
+
+      .info-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 0.25rem;
+      }
+
+      .photo-slider {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 1rem 0;
+        background: #f1f5f9;
+        min-height: 200px;
+      }
+
+      .slider-container {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .slider-images {
+        display: flex;
+        transition: transform 0.3s ease;
+        height: 100%;
+      }
+
+      .slider-image {
+        min-width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .slider-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .slider-nav:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .slider-nav.prev {
+        left: 10px;
+      }
+
+      .slider-nav.next {
+        right: 10px;
+      }
+
+      .slider-dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .slider-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .slider-dot.active {
+        background: white;
+        transform: scale(1.2);
+      }
+
+      .tour-360-button {
+        background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 1rem 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .tour-360-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      }
+
+      .services-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin: 1rem 0;
+      }
+
+      .service-badge {
+        background: rgba(79, 70, 229, 0.1);
+        color: var(--primary-color, #4f46e5);
+        padding: 0.5rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+      }
+
+      .config-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 24px;
+        background: #cbd5e1;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: #4f46e5;
+      }
+
+      .toggle-switch::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      .toggle-switch.active::before {
+        transform: translateX(26px);
+      }
+
+      .preset-templates {
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .preset-item {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .preset-item:hover {
+        border-color: #4f46e5;
+        background: #f8fafc;
+      }
+
+      .preset-item.active {
+        border-color: #4f46e5;
+        background: #eef2ff;
+        color: #4f46e5;
+      }
+
+      .zoom-controls {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .zoom-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+      }
+
+      .zoom-btn:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 1200px) {
+        .editor-container {
+          grid-template-columns: 250px 1fr 250px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .editor-container {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Editor de Plantillas</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="previewTemplate()">
+          Vista previa
+        </button>
+        <button class="btn btn-secondary" onclick="saveTemplate()">
+          Guardar
+        </button>
+        <button class="btn btn-primary" onclick="publishTemplate()">
+          Publicar
+        </button>
+      </div>
+    </div>
+
+    <div class="editor-container">
+      <div class="panel">
+        <div class="panel-header">Herramientas de Edición</div>
+        <div class="panel-content">
+          <div class="tools-section">
+            <h3>Información General</h3>
+            <div class="form-group">
+              <label>Título de la Plantilla</label>
+              <input
+                type="text"
+                id="templateTitle"
+                class="form-control"
+                value="Cotización Travelers Premium"
+                oninput="updatePreview()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Subtítulo</label>
+              <input
+                type="text"
+                id="templateSubtitle"
+                class="form-control"
+                value="Apartamentos turísticos en destinos únicos"
+                oninput="updatePreview()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea
+                id="templateDescription"
+                class="form-control"
+                rows="3"
+                oninput="updatePreview()"
+              >
+Disfruta de una experiencia única en nuestros apartamentos completamente equipados</textarea
+              >
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <h3>Colores y Estilo</h3>
+            <div class="form-group">
+              <label>Color Principal</label>
+              <div class="color-picker">
+                <div
+                  class="color-option active"
+                  style="background: #4f46e5"
+                  onclick="selectColor('#4f46e5', 'primary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #059669"
+                  onclick="selectColor('#059669', 'primary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #dc2626"
+                  onclick="selectColor('#dc2626', 'primary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #7c3aed"
+                  onclick="selectColor('#7c3aed', 'primary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #ea580c"
+                  onclick="selectColor('#ea580c', 'primary')"
+                ></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Color Secundario</label>
+              <div class="color-picker">
+                <div
+                  class="color-option"
+                  style="background: #6366f1"
+                  onclick="selectColor('#6366f1', 'secondary')"
+                ></div>
+                <div
+                  class="color-option active"
+                  style="background: #7c3aed"
+                  onclick="selectColor('#7c3aed', 'secondary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #0891b2"
+                  onclick="selectColor('#0891b2', 'secondary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #be185d"
+                  onclick="selectColor('#be185d', 'secondary')"
+                ></div>
+                <div
+                  class="color-option"
+                  style="background: #b45309"
+                  onclick="selectColor('#b45309', 'secondary')"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <h3>Servicios Incluidos</h3>
+            <div class="form-group">
+              <label>Edificio</label>
+              <select
+                id="buildingSelect"
+                class="form-control"
+                onchange="loadBuildingServices()"
+              >
+                <option value="bocagrande">Bocagrande Luxury</option>
+                <option value="castillogrande">Castillo Grande</option>
+                <option value="tayrona">Terrazas Tayrona</option>
+              </select>
+            </div>
+            <div class="services-list" id="servicesList"></div>
+            <div class="form-group">
+              <label>Añadir Servicio Personalizado</label>
+              <div style="display: flex; gap: 0.5rem">
+                <input
+                  type="text"
+                  id="customService"
+                  class="form-control"
+                  placeholder="Ej: Servicio de limpieza"
+                />
+                <button
+                  class="btn btn-secondary"
+                  onclick="addCustomService()"
+                  style="white-space: nowrap"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <h3>Galería de Fotos</h3>
+            <div class="form-group">
+              <label>URLs de Imágenes (una por línea)</label>
+              <textarea
+                id="imageUrls"
+                class="form-control"
+                rows="4"
+                oninput="updatePhotoSlider()"
+                placeholder="https://ejemplo.com/imagen1.jpg"
+              >
+https://placehold.co/600x400/4f46e5/ffffff?text=Apartamento+1
+https://placehold.co/600x400/7c3aed/ffffff?text=Apartamento+2
+https://placehold.co/600x400/059669/ffffff?text=Apartamento+3</textarea
+              >
+            </div>
+            <div class="form-group">
+              <label>Tour Virtual 360°</label>
+              <input
+                type="url"
+                id="tour360Url"
+                class="form-control"
+                placeholder="URL del tour 360° de Google"
+                oninput="updatePreview()"
+              />
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <h3>Información de Contacto</h3>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input
+                type="text"
+                id="contactPhone"
+                class="form-control"
+                value="+57 300 123 4567"
+                oninput="updatePreview()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                id="contactEmail"
+                class="form-control"
+                value="reservas@travelers.com"
+                oninput="updatePreview()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Website</label>
+              <input
+                type="url"
+                id="contactWebsite"
+                class="form-control"
+                value="www.travelers.com"
+                oninput="updatePreview()"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Vista Previa en Tiempo Real</div>
+        <div class="panel-content preview-container">
+          <div class="template-preview" id="templatePreview">
+            <div class="template-header">
+              <div class="template-logo">🏢</div>
+              <div class="template-title" id="previewTitle">
+                Cotización Travelers Premium
+              </div>
+              <div class="template-subtitle" id="previewSubtitle">
+                Apartamentos turísticos en destinos únicos
+              </div>
+            </div>
+
+            <div class="template-body">
+              <div class="photo-slider" id="photoSlider">
+                <div class="slider-container">
+                  <div class="slider-images" id="sliderImages">
+                    <img
+                      src="https://placehold.co/600x400/4f46e5/ffffff?text=Apartamento+1"
+                      alt="Imagen 1"
+                      class="slider-image"
+                    />
+                    <img
+                      src="https://placehold.co/600x400/7c3aed/ffffff?text=Apartamento+2"
+                      alt="Imagen 2"
+                      class="slider-image"
+                    />
+                    <img
+                      src="https://placehold.co/600x400/059669/ffffff?text=Apartamento+3"
+                      alt="Imagen 3"
+                      class="slider-image"
+                    />
+                  </div>
+                  <button class="slider-nav prev" onclick="previousSlide()">
+                    ‹
+                  </button>
+                  <button class="slider-nav next" onclick="nextSlide()">
+                    ›
+                  </button>
+                  <div class="slider-dots" id="sliderDots">
+                    <div class="slider-dot active" onclick="goToSlide(0)"></div>
+                    <div class="slider-dot" onclick="goToSlide(1)"></div>
+                    <div class="slider-dot" onclick="goToSlide(2)"></div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                class="tour-360-button"
+                id="tour360Button"
+                style="display: none"
+                onclick="openTour360()"
+              >
+                Ver Tour Virtual 360°
+              </button>
+
+              <div class="info-section">
+                <h3>Detalles de la Reserva</h3>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Destino</div>
+                    <div class="info-value">Cartagena, Colombia</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Huéspedes</div>
+                    <div class="info-value">2 personas</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Check-in</div>
+                    <div class="info-value">15 Dic 2024</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Check-out</div>
+                    <div class="info-value">22 Dic 2024</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-section">
+                <h3>Información del Apartamento</h3>
+                <p id="previewDescription">
+                  Disfruta de una experiencia única en nuestros apartamentos
+                  completamente equipados
+                </p>
+              </div>
+
+              <div class="info-section">
+                <h3>Servicios Incluidos</h3>
+                <div class="services-grid" id="previewServices"></div>
+              </div>
+
+              <div class="info-section">
+                <h3>Contacto</h3>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-value" id="previewPhone">
+                      +57 300 123 4567
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value" id="previewEmail">
+                      reservas@travelers.com
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomOut()">-</button>
+            <button class="zoom-btn" onclick="zoomIn()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Configuraciones</div>
+        <div class="panel-content">
+          <div class="config-section">
+            <h3>Plantillas Predefinidas</h3>
+            <div class="preset-templates">
+              <div class="preset-item active" onclick="loadPreset('premium')">
+                Premium
+              </div>
+              <div class="preset-item" onclick="loadPreset('classic')">
+                Clásica
+              </div>
+              <div class="preset-item" onclick="loadPreset('modern')">
+                Moderna
+              </div>
+              <div class="preset-item" onclick="loadPreset('minimal')">
+                Minimalista
+              </div>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h3>Opciones de Visualización</h3>
+            <div class="form-group">
+              <label
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                Mostrar Logo
+                <div
+                  class="toggle-switch active"
+                  onclick="toggleOption(this, 'logo')"
+                ></div>
+              </label>
+            </div>
+            <div class="form-group">
+              <label
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                Mostrar Gradiente
+                <div
+                  class="toggle-switch active"
+                  onclick="toggleOption(this, 'gradient')"
+                ></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h3>Exportar Plantilla</h3>
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 0.5rem"
+              onclick="exportHTML()"
+            >
+              Exportar HTML
+            </button>
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 0.5rem"
+              onclick="exportPDF()"
+            >
+              Exportar PDF
+            </button>
+            <button
+              class="btn btn-primary"
+              style="width: 100%"
+              onclick="saveAsTemplate()"
+            >
+              Guardar como Nueva Plantilla
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentZoom = 1;
+      let primaryColor = '#4f46e5';
+      let secondaryColor = '#7c3aed';
+      let currentSlide = 0;
+      let slideImages = [];
+
+      const buildingServices = {
+        bocagrande: [
+          { name: 'Piscina', included: true },
+          { name: 'Gimnasio', included: true },
+          { name: 'WiFi Gratis', included: true },
+          { name: 'Aire Acondicionado', included: true },
+          { name: 'Parqueadero', included: true },
+          { name: 'Recepción 24h', included: false },
+          { name: 'Servicio de Limpieza', included: false },
+          { name: 'Cocina Equipada', included: true },
+          { name: 'Seguridad Privada', included: true },
+        ],
+        castillogrande: [
+          { name: 'Acceso a Playa', included: true },
+          { name: 'WiFi Gratis', included: true },
+          { name: 'Aire Acondicionado', included: true },
+          { name: 'Parqueadero', included: false },
+          { name: 'Cocina Equipada', included: true },
+          { name: 'Lavandería', included: true },
+          { name: 'Seguridad Privada', included: true },
+          { name: 'Vista al Mar', included: true },
+        ],
+        tayrona: [
+          { name: 'Rodeado de Naturaleza', included: true },
+          { name: 'WiFi Gratis', included: true },
+          { name: 'Aire Acondicionado', included: true },
+          { name: 'Parqueadero', included: true },
+          { name: 'Cocina Equipada', included: true },
+          { name: 'Transfer al Parque', included: false },
+          { name: 'Guías Turísticos', included: false },
+          { name: 'Tours Ecológicos', included: false },
+        ],
+      };
+
+      function updatePreview() {
+        document.getElementById('previewTitle').textContent =
+          document.getElementById('templateTitle').value;
+        document.getElementById('previewSubtitle').textContent =
+          document.getElementById('templateSubtitle').value;
+        document.getElementById('previewDescription').textContent =
+          document.getElementById('templateDescription').value;
+        document.getElementById('previewPhone').textContent =
+          document.getElementById('contactPhone').value;
+        document.getElementById('previewEmail').textContent =
+          document.getElementById('contactEmail').value;
+
+        const tour360Url = document.getElementById('tour360Url').value;
+        const tour360Button = document.getElementById('tour360Button');
+        if (tour360Url.trim()) {
+          tour360Button.style.display = 'block';
+          tour360Button.setAttribute('data-url', tour360Url);
+        } else {
+          tour360Button.style.display = 'none';
+        }
+
+        updateServicesPreview();
+      }
+
+      function loadBuildingServices() {
+        const building = document.getElementById('buildingSelect').value;
+        const services = buildingServices[building];
+        const servicesList = document.getElementById('servicesList');
+
+        servicesList.innerHTML = '';
+        services.forEach((service) => {
+          const serviceItem = document.createElement('div');
+          serviceItem.className = 'service-item';
+          serviceItem.innerHTML = `
+          <label style="display: flex; align-items: center; flex: 1;">
+            <input type="checkbox" class="service-checkbox" ${
+              service.included ? 'checked' : ''
+            } 
+                   onchange="updateServicesPreview()" data-service="${
+                     service.name
+                   }">
+            ${service.name}
+          </label>
+          <span class="remove-service" onclick="removeService(this)" title="Eliminar servicio">×</span>
+        `;
+          servicesList.appendChild(serviceItem);
+        });
+
+        updateServicesPreview();
+      }
+
+      function addCustomService() {
+        const customInput = document.getElementById('customService');
+        const serviceName = customInput.value.trim();
+
+        if (!serviceName) return;
+
+        const servicesList = document.getElementById('servicesList');
+        const serviceItem = document.createElement('div');
+        serviceItem.className = 'service-item';
+        serviceItem.innerHTML = `
+        <label style="display: flex; align-items: center; flex: 1;">
+          <input type="checkbox" class="service-checkbox" checked 
+                 onchange="updateServicesPreview()" data-service="${serviceName}">
+          ${serviceName}
+        </label>
+        <span class="remove-service" onclick="removeService(this)" title="Eliminar servicio">×</span>
+      `;
+        servicesList.appendChild(serviceItem);
+
+        customInput.value = '';
+        updateServicesPreview();
+      }
+
+      function removeService(element) {
+        element.parentElement.remove();
+        updateServicesPreview();
+      }
+
+      function updateServicesPreview() {
+        const checkboxes = document.querySelectorAll(
+          '#servicesList input[type="checkbox"]:checked'
+        );
+        const previewServices = document.getElementById('previewServices');
+
+        previewServices.innerHTML = '';
+        checkboxes.forEach((checkbox) => {
+          const serviceBadge = document.createElement('div');
+          serviceBadge.className = 'service-badge';
+          serviceBadge.textContent = checkbox.getAttribute('data-service');
+          previewServices.appendChild(serviceBadge);
+        });
+      }
+
+      function updatePhotoSlider() {
+        const urls = document
+          .getElementById('imageUrls')
+          .value.split('\n')
+          .filter((url) => url.trim());
+        const sliderImages = document.getElementById('sliderImages');
+        const sliderDots = document.getElementById('sliderDots');
+
+        slideImages = urls;
+        currentSlide = 0;
+
+        sliderImages.innerHTML = '';
+        urls.forEach((url, index) => {
+          const img = document.createElement('img');
+          img.src = url.trim();
+          img.className = 'slider-image';
+          img.alt = `Imagen ${index + 1}`;
+          sliderImages.appendChild(img);
+        });
+
+        sliderDots.innerHTML = '';
+        urls.forEach((_, index) => {
+          const dot = document.createElement('div');
+          dot.className = `slider-dot ${index === 0 ? 'active' : ''}`;
+          dot.onclick = () => goToSlide(index);
+          sliderDots.appendChild(dot);
+        });
+
+        updateSliderPosition();
+      }
+
+      function nextSlide() {
+        if (slideImages.length === 0) return;
+        currentSlide = (currentSlide + 1) % slideImages.length;
+        updateSliderPosition();
+      }
+
+      function previousSlide() {
+        if (slideImages.length === 0) return;
+        currentSlide =
+          (currentSlide - 1 + slideImages.length) % slideImages.length;
+        updateSliderPosition();
+      }
+
+      function goToSlide(index) {
+        currentSlide = index;
+        updateSliderPosition();
+      }
+
+      function updateSliderPosition() {
+        const sliderImages = document.getElementById('sliderImages');
+        const sliderDots = document.querySelectorAll('.slider-dot');
+
+        sliderImages.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        sliderDots.forEach((dot, index) => {
+          dot.classList.toggle('active', index === currentSlide);
+        });
+      }
+
+      function openTour360() {
+        const url = document
+          .getElementById('tour360Button')
+          .getAttribute('data-url');
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+
+      function selectColor(color, type) {
+        document.documentElement.style.setProperty(`--${type}-color`, color);
+
+        if (type === 'primary') {
+          primaryColor = color;
+        } else {
+          secondaryColor = color;
+        }
+
+        document
+          .querySelectorAll('.color-picker .color-option')
+          .forEach((el) => {
+            el.classList.remove('active');
+          });
+        event.target.classList.add('active');
+      }
+
+      function zoomIn() {
+        currentZoom = Math.min(currentZoom + 0.1, 1.5);
+        updateZoom();
+      }
+
+      function zoomOut() {
+        currentZoom = Math.max(currentZoom - 0.1, 0.5);
+        updateZoom();
+      }
+
+      function updateZoom() {
+        const preview = document.getElementById('templatePreview');
+        preview.style.transform = `scale(${currentZoom})`;
+      }
+
+      function toggleOption(element, option) {
+        element.classList.toggle('active');
+
+        const preview = document.getElementById('templatePreview');
+        const logo = preview.querySelector('.template-logo');
+        const header = preview.querySelector('.template-header');
+
+        switch (option) {
+          case 'logo':
+            logo.style.display = element.classList.contains('active')
+              ? 'flex'
+              : 'none';
+            break;
+          case 'gradient':
+            if (element.classList.contains('active')) {
+              header.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+            } else {
+              header.style.background = primaryColor;
+            }
+            break;
+        }
+      }
+
+      function loadPreset(preset) {
+        document.querySelectorAll('.preset-item').forEach((el) => {
+          el.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        switch (preset) {
+          case 'premium':
+            selectColor('#4f46e5', 'primary');
+            selectColor('#7c3aed', 'secondary');
+            break;
+          case 'classic':
+            selectColor('#059669', 'primary');
+            selectColor('#0891b2', 'secondary');
+            break;
+          case 'modern':
+            selectColor('#dc2626', 'primary');
+            selectColor('#be185d', 'secondary');
+            break;
+          case 'minimal':
+            selectColor('#374151', 'primary');
+            selectColor('#6b7280', 'secondary');
+            break;
+        }
+      }
+
+      function previewTemplate() {
+        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+        const previewContent =
+          document.getElementById('templatePreview').outerHTML;
+        previewWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Vista Previa - Plantilla</title>
+            <style>${document.querySelector('style').innerHTML}</style>
+          </head>
+          <body style="padding: 2rem; background: #f1f5f9;">
+            ${previewContent}
+          </body>
+        </html>
+      `);
+      }
+
+      function saveTemplate() {
+        const templateConfig = {
+          title: document.getElementById('templateTitle').value,
+          subtitle: document.getElementById('templateSubtitle').value,
+          description: document.getElementById('templateDescription').value,
+          phone: document.getElementById('contactPhone').value,
+          email: document.getElementById('contactEmail').value,
+          website: document.getElementById('contactWebsite').value,
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
+          building: document.getElementById('buildingSelect').value,
+          images: document.getElementById('imageUrls').value,
+          tour360: document.getElementById('tour360Url').value,
+        };
+
+        localStorage.setItem('currentTemplate', JSON.stringify(templateConfig));
+        alert('Plantilla guardada exitosamente!');
+      }
+
+      function publishTemplate() {
+        alert('Funcionalidad de publicación estará disponible pronto!');
+      }
+
+      function exportHTML() {
+        alert('Funcionalidad de exportar HTML estará disponible pronto!');
+      }
+
+      function exportPDF() {
+        alert('Funcionalidad de exportar PDF estará disponible pronto!');
+      }
+
+      function saveAsTemplate() {
+        const name = prompt('Nombre para la nueva plantilla:');
+        if (name) {
+          alert(`Plantilla "${name}" guardada exitosamente!`);
+        }
+      }
+
+      window.addEventListener('load', () => {
+        loadBuildingServices();
+        updatePhotoSlider();
+
+        const saved = localStorage.getItem('currentTemplate');
+        if (saved) {
+          const config = JSON.parse(saved);
+          document.getElementById('templateTitle').value = config.title || '';
+          document.getElementById('templateSubtitle').value =
+            config.subtitle || '';
+          document.getElementById('templateDescription').value =
+            config.description || '';
+          document.getElementById('contactPhone').value = config.phone || '';
+          document.getElementById('contactEmail').value = config.email || '';
+          document.getElementById('contactWebsite').value =
+            config.website || '';
+          document.getElementById('tour360Iframe').value =
+            config.tourIframe || '';
+          document.getElementById('imageUrls').value = config.images || '';
+
+          if (config.building) {
+            document.getElementById('buildingSelect').value = config.building;
+            loadBuildingServices();
+          }
+
+          if (config.primaryColor) selectColor(config.primaryColor, 'primary');
+          if (config.secondaryColor)
+            selectColor(config.secondaryColor, 'secondary');
+
+          updatePreview();
+          updatePhotoSlider();
+        }
+      });
+    </script>
+  </body>
+</html>

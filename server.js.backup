@@ -1,0 +1,177 @@
+// -----------------------------------------------------------------
+// --- SERVIDOR BACKEND PARA COTIZADOR TRAVELERS (CON EDICIÓN) ---
+// -----------------------------------------------------------------
+
+// --- 1. IMPORTACIONES DE LIBRERÍAS ---
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
+const path = require('path');
+
+// --- 2. CONFIGURACIÓN INICIAL ---
+const app = express();
+const port = 3000;
+
+// --- 3. CONFIGURACIÓN DE LA BASE DE DATOS ---
+const pool = new Pool({
+  user: 'cotizador_user',
+  host: 'localhost',
+  database: 'cotizador_db',
+  password: '1234',
+  port: 5432,
+});
+
+// --- 4. MIDDLEWARE ---
+app.use(cors());
+app.use(express.json());
+
+// --- 5. DEFINICIÓN DE RUTAS (ENDPOINTS DE LA API) ---
+
+// --- RUTAS PÚBLICAS (Para el Cotizador) ---
+
+app.get('/api/tarifario', async (req, res) => {
+  try {
+    const query = `
+            SELECT 
+                e.nombre AS edificio,
+                e.ciudad,
+                ta.nombre AS tipo_apartamento,
+                ta.descripcion,
+                t.personas,
+                t.precio
+            FROM edificios e
+            JOIN tipos_apartamento ta ON e.id = ta.edificio_id
+            JOIN tarifas t ON ta.id = t.tipo_apartamento_id
+            ORDER BY e.nombre, ta.nombre, t.personas;
+        `;
+    const { rows } = await pool.query(query);
+
+    const tarifario = {};
+    rows.forEach((row) => {
+      if (!tarifario[row.edificio]) {
+        tarifario[row.edificio] = {
+          ciudad: row.ciudad,
+          tipos: {},
+        };
+      }
+      if (!tarifario[row.edificio].tipos[row.tipo_apartamento]) {
+        tarifario[row.edificio].tipos[row.tipo_apartamento] = {
+          descripcion: row.descripcion,
+          pax: {},
+        };
+      }
+      tarifario[row.edificio].tipos[row.tipo_apartamento].pax[row.personas] =
+        row.precio;
+    });
+
+    res.json(tarifario);
+  } catch (err) {
+    console.error('Error al obtener el tarifario:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.post('/api/fichas', async (req, res) => {
+  try {
+    const { cliente, edificio, tipo, personas, dias, total, descripcionApto } =
+      req.body;
+    const query = `
+            INSERT INTO fichas (cliente, edificio, tipo_apartamento, personas, dias, total, descripcion)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id;
+        `;
+    const values = [
+      cliente,
+      edificio,
+      tipo,
+      personas,
+      dias,
+      total,
+      descripcionApto,
+    ];
+    const result = await pool.query(query, values);
+    res.status(201).json({ id: result.rows[0].id });
+  } catch (err) {
+    console.error('Error al guardar la ficha:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.get('/api/fichas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const query = 'SELECT * FROM fichas WHERE id = $1';
+    const { rows } = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Ficha no encontrada' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error al obtener la ficha:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// --- RUTAS DE ADMINISTRACIÓN (Para el Dashboard) ---
+
+// Endpoint para OBTENER todas las tarifas
+app.get('/api/admin/tarifas', async (req, res) => {
+  try {
+    const query = `
+            SELECT 
+                t.id,
+                e.nombre AS edificio,
+                ta.nombre AS tipo_apartamento,
+                t.personas,
+                t.precio
+            FROM tarifas t
+            JOIN tipos_apartamento ta ON t.tipo_apartamento_id = ta.id
+            JOIN edificios e ON ta.edificio_id = e.id
+            ORDER BY e.nombre, ta.nombre, t.personas;
+        `;
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (err) {
+    console.error('Error al obtener tarifas para admin:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Endpoint para ACTUALIZAR una tarifa
+app.put('/api/admin/tarifas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { precio } = req.body;
+
+    if (!precio || isNaN(precio)) {
+      return res
+        .status(400)
+        .json({ error: 'El precio proporcionado no es válido.' });
+    }
+
+    const query = `
+            UPDATE tarifas
+            SET precio = $1
+            WHERE id = $2
+            RETURNING *;
+        `;
+    const { rows } = await pool.query(query, [precio, id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Tarifa no encontrada.' });
+    }
+
+    res.json({ message: 'Tarifa actualizada con éxito', tarifa: rows[0] });
+  } catch (err) {
+    console.error('Error al actualizar la tarifa:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// --- 6. INICIO DEL SERVIDOR ---
+app.listen(port, () => {
+  console.log(
+    `🚀 Servidor backend iniciado y escuchando en http://localhost:${port}`
+  );
+});

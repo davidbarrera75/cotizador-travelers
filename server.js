@@ -19,29 +19,33 @@ const pool = new Pool({
   user: 'cotizador_user',
   host: 'localhost',
   database: 'cotizador_db',
-  password: '1234',
+  password: 'password_seguro_para_cotizador',
   port: 5432,
 });
 
 // --- 4. MIDDLEWARE ---
 app.use(
   cors({
-    origin: true,
-    credentials: true,
+    origin: ['http://localhost:8000', 'http://127.0.0.1:8000'], // Permitir ambos
+    credentials: true, // CRUCIAL: Permite envío de cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
 app.use(express.json());
 
 // Configuración de sesiones
 app.use(
   session({
-    secret: 'cotizador-travelers-secret-2025-' + Math.random(),
+    secret: 'mi-secreto-super-seguro-2024',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Cambiar a true cuando uses HTTPS
+      secure: false, // false para desarrollo local
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 24 horas
+      maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      sameSite: 'lax', // Importante para cross-origin
     },
   })
 );
@@ -158,7 +162,7 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/tarifario', async (req, res) => {
   try {
     const query = `
-      SELECT 
+      SELECT
         e.nombre AS edificio,
         e.ciudad,
         ta.nombre AS tipo_apartamento,
@@ -245,7 +249,7 @@ app.get('/api/fichas/:id', async (req, res) => {
 app.get('/api/admin/tarifas', requireAuth, async (req, res) => {
   try {
     const query = `
-      SELECT 
+      SELECT
         t.id,
         e.nombre AS edificio,
         ta.nombre AS tipo_apartamento,

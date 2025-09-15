@@ -157,12 +157,7 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const API_BASE =
-          window.location.hostname === 'localhost'
-            ? 'http://localhost:3000/api' // Desarrollo local
-            : '/api'; // Producción
-
-        const API_URL = `${API_BASE}/admin/tarifas`; // Usamos una ruta relativa
+        const API_URL = '/api/admin/tarifas'; // Usamos una ruta relativa
         let allTarifas = []; // Para guardar los datos localmente
 
         const loadingState = document.getElementById('loading-state');
@@ -187,27 +182,10 @@
             errorState.style.display = 'none';
             tableContainer.style.display = 'none';
 
-            const response = await fetch(API_URL, {
-              method: 'GET',
-              credentials: 'include', // CRUCIAL: Incluye cookies de sesión
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (response.status === 401) {
-              // No autorizado, redirigir al login
-              alert('Sesión expirada. Redirigiendo al login...');
-              window.location.href = '/login.html';
-              return;
-            }
-
+            const response = await fetch(API_URL);
             if (!response.ok) {
-              throw new Error(
-                `Error ${response.status}: ${response.statusText}`
-              );
+              throw new Error('La respuesta del servidor no fue OK');
             }
-
             allTarifas = await response.json();
             renderizarTabla(allTarifas);
 

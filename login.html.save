@@ -1,0 +1,64 @@
+<!DOCTYKPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Cotizador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
+        <img src="https://i.imgur.com/O1h5I0v.png" alt="Travelers Logo" class="mx-auto mb-6 h-20">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Acceso de Administración</h1>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
+                <input type="text" id="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                <input type="password" id="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500">
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Ingresar
+            </button>
+        </form>
+        <p id="error-message" class="mt-4 text-center text-sm text-red-600 h-4"></p>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('error-message');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evitamos que la página se recargue
+            errorMessage.textContent = ''; // Limpiamos errores previos
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Si el login es exitoso, redirigimos al dashboard
+                    window.location.href = '/dashboard.html';
+                } else {
+                    // Si hay un error, mostramos el mensaje del servidor
+                    errorMessage.textContent = data.message || 'Error al iniciar sesión.';
+                }
+
+            } catch (error) {
+                console.error('Error de red:', error);
+                errorMessage.textContent = 'No se pudo conectar con el servidor.';
+            }
